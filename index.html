@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AKHL AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; background: #0f172a; color: white; }
+    .chat { padding: 10px; }
+    input, button { padding: 10px; margin: 5px; border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+<h2>AKHL AI</h2>
+
+<div>
+  <input id="msg" placeholder="Tulis pesan...">
+  <button onclick="send()">Kirim</button>
+</div>
+
+<div>
+  <button onclick="setMode('mtk')">MTK</button>
+  <button onclick="setMode('pikir')">Pikirkan</button>
+  <button onclick="setMode('web')">Web</button>
+  <button onclick="setMode('code')">Code+</button>
+</div>
+
+<div class="chat" id="chat"></div>
+
+<script>
+let mode = "normal";
+
+function setMode(m) {
+  mode = m;
+}
+
+async function send() {
+  let text = document.getElementById("msg").value;
+
+  let res = await fetch("http://localhost:3000/chat", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({message: text, mode})
+  });
+
+  let data = await res.json();
+  document.getElementById("chat").innerHTML += "<p>"+data.reply+"</p>";
+}
+</script>
+
+</body>
+</html>
