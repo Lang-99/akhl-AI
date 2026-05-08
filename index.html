@@ -157,7 +157,7 @@ button {
 
 <div class="input-area">
   <input id="input" placeholder="Tanya sesuatu...">
-  <button type="button" onclick="kirim()">Kirim</button>
+  <button type="button" id="sendBtn">Kirim</button>
 </div>
 
 <div class="popup" id="popup">
@@ -169,7 +169,6 @@ button {
   <div class="modal-box">
     <h3>Edit Profil</h3>
     <input id="editName" placeholder="Nama baru"><br><br>
-    <input type="file" id="editPhotoFile"><br><br>
     <button onclick="saveProfile()">Simpan</button>
   </div>
 </div>
@@ -178,8 +177,9 @@ button {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+/* FIREBASE (BIARIN AJA PUNYA LU) */
 const firebaseConfig = {
-  apiKey: "ISI_API_FIREBASE_KAMU",
+  apiKey: "ISI_FIREBASE_KAMU",
   authDomain: "ISI_DOMAIN_KAMU"
 };
 
@@ -196,7 +196,6 @@ onAuthStateChanged(auth, user => {
     pfp.src = user.photoURL;
     pfp.style.display = "block";
     logoutBtn.style.display = "block";
-
     localStorage.setItem("login", "true");
     popup.style.display = "none";
   } else {
@@ -233,8 +232,8 @@ window.saveProfile = () => {
 /* CHAT */
 let sudah = false;
 
-window.kirim = async () => {
-  let text = input.value;
+async function kirim() {
+  let text = input.value.trim();
   if (!text) return;
 
   addMsg(text, "user");
@@ -245,15 +244,14 @@ window.kirim = async () => {
   chat.appendChild(typing);
 
   input.value = "";
+  input.blur();
 
   try {
     const res = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAWtLlQ5xB8adHnMrSGQ4S-T_CRNHYUens",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
           contents: [{ parts: [{ text }] }]
         })
@@ -277,10 +275,23 @@ window.kirim = async () => {
 
   if (!sudah && !pernahLogin) {
     sudah = true;
-    setTimeout(() => popup.classList.add("show"), 5000);
+    setTimeout(() => popup.classList.add("show"), 4000);
   }
-};
+}
 
+/* EVENT FIX (ANTI BUG HP) */
+sendBtn.addEventListener("click", () => {
+  kirim();
+});
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    kirim();
+  }
+});
+
+/* UI */
 function typeEffect(text) {
   let div = document.createElement("div");
   div.className = "msg bot";
