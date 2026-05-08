@@ -284,12 +284,35 @@ window.kirim = () => {
   setTimeout(() => {
     typing.remove();
 
-    let res = text.toLowerCase() === "ardi femboy"
-      ? "Ya Ardi Adalah Femboy!"
-      : "AI: " + text;
+    try {
+  const res = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyB4-2nfSV8PE5WOIsy3PzMPxhRQ64oByis",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: text }]
+        }]
+      })
+    }
+  );
 
-    typeEffect(res);
-  }, 1000);
+  const data = await res.json();
+  typing.remove();
+
+  let reply =
+    data.candidates?.[0]?.content?.parts?.[0]?.text ||
+    "AI error";
+
+  typeEffect(reply);
+
+} catch (err) {
+  typing.remove();
+  typeEffect("Error: " + err.message);
+}
 
   input.value = "";
 
