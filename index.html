@@ -281,7 +281,8 @@ window.kirim = async () => {
   typing.innerText = "AI sedang mengetik...";
   chat.appendChild(typing);
 
-  setTimeout(() => {
+  try {
+  const res = await fetch(
     typing.remove();
 
     try {
