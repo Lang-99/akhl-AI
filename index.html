@@ -3,48 +3,231 @@
 <head>
   <title>AKHL AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    body { font-family: Arial; background: #0f172a; color: white; }
-    .chat { padding: 10px; }
-    input, button { padding: 10px; margin: 5px; border-radius: 10px; }
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 15px;
+      text-align: center;
+      background: #020617;
+      font-weight: bold;
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .msg {
+      margin: 10px 0;
+      max-width: 75%;
+      padding: 10px;
+      border-radius: 15px;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeIn 0.3s forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .user {
+      background: #2563eb;
+      margin-left: auto;
+    }
+
+    .bot {
+      background: #1e293b;
+      margin-right: auto;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 10px;
+      background: #020617;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: none;
+    }
+
+    button {
+      margin-left: 10px;
+      padding: 10px;
+      border-radius: 20px;
+      border: none;
+      background: #2563eb;
+      color: white;
+    }
+
+    .fab {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #2563eb;
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      font-size: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu {
+      position: fixed;
+      bottom: 150px;
+      right: 20px;
+      background: #1e293b;
+      border-radius: 10px;
+      display: none;
+      flex-direction: column;
+    }
+
+    .menu button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 10px;
+    }
+
+    .login {
+      text-align: center;
+      padding: 20px;
+    }
   </style>
 </head>
+
 <body>
 
-<h2>AKHL AI</h2>
+<header>AKHL AI</header>
 
-<div>
-  <input id="msg" placeholder="Tulis pesan...">
-  <button onclick="send()">Kirim</button>
+<div id="login" class="login">
+  <button onclick="login()">Login dengan Google</button>
 </div>
 
-<div>
-  <button onclick="setMode('mtk')">MTK</button>
-  <button onclick="setMode('pikir')">Pikirkan</button>
-  <button onclick="setMode('web')">Web</button>
-  <button onclick="setMode('code')">Code+</button>
+<div id="app" style="display:none;">
+  <div id="chat"></div>
+
+  <div class="input-area">
+    <input id="msg" placeholder="Tulis pesan...">
+    <button onclick="send()">Kirim</button>
+  </div>
+
+  <div class="fab" onclick="toggleMenu()">+</div>
+
+  <div class="menu" id="menu">
+    <button onclick="setMode('mtk')">📘 MTK</button>
+    <button onclick="setMode('pikir')">🧠 Pikirkan</button>
+    <button onclick="setMode('web')">🌐 Web</button>
+    <button onclick="setMode('code')">💻 Code+</button>
+  </div>
 </div>
 
-<div class="chat" id="chat"></div>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
 
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBGuuXOqwE1bNNxlH8PEz4Y9jry9zz50D8",
+  authDomain: "akhl-c8e44.firebaseapp.com",
+  projectId: "akhl-c8e44",
+  appId: "1:xxxxx:web:xxxxx"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+function login() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider);
+}
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    loadChat();
+  }
+});
+
 let mode = "normal";
+
+function toggleMenu() {
+  let menu = document.getElementById("menu");
+  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
 
 function setMode(m) {
   mode = m;
 }
 
+function addMessage(text, type) {
+  let div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  document.getElementById("chat").appendChild(div);
+  saveChat();
+  scrollDown();
+}
+
+function scrollDown() {
+  let chat = document.getElementById("chat");
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function typingEffect(text) {
+  let div = document.createElement("div");
+  div.className = "msg bot";
+  document.getElementById("chat").appendChild(div);
+
+  let i = 0;
+  let interval = setInterval(() => {
+    div.innerText += text[i];
+    i++;
+    scrollDown();
+    if (i >= text.length) clearInterval(interval);
+  }, 20);
+}
+
+function saveChat() {
+  localStorage.setItem("chat", document.getElementById("chat").innerHTML);
+}
+
+function loadChat() {
+  let data = localStorage.getItem("chat");
+  if (data) document.getElementById("chat").innerHTML = data;
+}
+
 async function send() {
-  let text = document.getElementById("msg").value;
+  let input = document.getElementById("msg");
+  let text = input.value;
+  if (!text) return;
 
-  let res = await fetch("http://localhost:3000/chat", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({message: text, mode})
-  });
+  addMessage(text, "user");
+  input.value = "";
 
-  let data = await res.json();
-  document.getElementById("chat").innerHTML += "<p>"+data.reply+"</p>";
+  setTimeout(() => {
+    typingEffect("Jawaban AI (" + mode + ")");
+  }, 500);
 }
 </script>
 
