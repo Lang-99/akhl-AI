@@ -15,14 +15,11 @@ body {
   color: white;
 }
 
-/* TOP */
 .topbar {
   display: flex;
   justify-content: space-between;
   padding: 15px;
 }
-
-.title { font-weight: 600; }
 
 .profile {
   display: flex;
@@ -36,7 +33,6 @@ body {
   border-radius: 50%;
 }
 
-/* MENU */
 .menu-btn { cursor: pointer; }
 
 .dropdown {
@@ -60,7 +56,6 @@ body {
 
 .logout { color: red; }
 
-/* CHAT */
 .chat {
   height: 70vh;
   overflow-y: auto;
@@ -76,7 +71,6 @@ body {
 .user { background: #1f1f1f; text-align: right; }
 .bot { background: #141414; }
 
-/* INPUT */
 .input-area {
   display: flex;
   padding: 10px;
@@ -98,9 +92,9 @@ button {
   background: #111;
   border: none;
   color: white;
+  touch-action: manipulation;
 }
 
-/* POPUP */
 .popup {
   position: fixed;
   bottom: -200px;
@@ -114,7 +108,6 @@ button {
 
 .popup.show { bottom: 20px; }
 
-/* MODAL */
 .modal {
   position: fixed;
   top: 0;
@@ -134,7 +127,6 @@ button {
   text-align: center;
 }
 
-/* typing */
 .typing {
   font-size: 12px;
   opacity: 0.6;
@@ -145,7 +137,7 @@ button {
 <body>
 
 <div class="topbar">
-  <div class="title">AKHL AI</div>
+  <div>AKHL AI</div>
 
   <div class="profile">
     <img id="pfp" style="display:none;">
@@ -165,7 +157,7 @@ button {
 
 <div class="input-area">
   <input id="input" placeholder="Tanya sesuatu...">
-  <button onclick="kirim()">➤</button>
+  <button type="button" onclick="kirim()">Kirim</button>
 </div>
 
 <div class="popup" id="popup">
@@ -173,12 +165,11 @@ button {
   <br><button onclick="loginGoogle()">Login Google</button>
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <h3>Edit Profil</h3>
     <input id="editName" placeholder="Nama baru"><br><br>
-    <input type="file" id="editPhotoFile" accept="image/*"><br><br>
+    <input type="file" id="editPhotoFile"><br><br>
     <button onclick="saveProfile()">Simpan</button>
   </div>
 </div>
@@ -188,8 +179,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBGuuXOqwE1bNNxlH8PEz4Y9jry9zz50D8",
-  authDomain: "akhl-c8e44.firebaseapp.com"
+  apiKey: "ISI_API_FIREBASE_KAMU",
+  authDomain: "ISI_DOMAIN_KAMU"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -198,7 +189,7 @@ const provider = new GoogleAuthProvider();
 
 let pernahLogin = localStorage.getItem("login");
 
-/* DETECT LOGIN */
+/* AUTH */
 onAuthStateChanged(auth, user => {
   if (user) {
     username.innerText = user.displayName;
@@ -208,64 +199,36 @@ onAuthStateChanged(auth, user => {
 
     localStorage.setItem("login", "true");
     popup.style.display = "none";
-
   } else {
     username.innerText = "";
     pfp.style.display = "none";
     logoutBtn.style.display = "none";
-
     localStorage.removeItem("login");
   }
 });
 
-/* LOGIN */
-window.loginGoogle = () => {
-  signInWithPopup(auth, provider);
-}
+window.loginGoogle = () => signInWithPopup(auth, provider);
+window.logout = () => signOut(auth);
 
-/* LOGOUT */
-window.logout = () => {
-  signOut(auth);
-  popup.classList.remove("show");
-}
-
-/* MENU */
 window.toggleMenu = () => {
   menu.style.display = menu.style.display === "block" ? "none" : "block";
-}
+};
 
-/* PROFILE */
 window.openProfile = () => {
   if (!auth.currentUser) return alert("Login dulu!");
   modal.style.display = "flex";
-}
+};
 
 window.saveProfile = () => {
   let user = auth.currentUser;
   if (!user) return;
 
-  let name = editName.value;
-  let file = editPhotoFile.files[0];
-
-  if (file) {
-    let reader = new FileReader();
-    reader.onload = e => {
-      updateProfile(user, {
-        displayName: name || user.displayName,
-        photoURL: e.target.result
-      }).then(() => {
-        pfp.src = e.target.result;
-      });
-    };
-    reader.readAsDataURL(file);
-  } else {
-    updateProfile(user, {
-      displayName: name || user.displayName
-    });
-  }
+  updateProfile(user, {
+    displayName: editName.value || user.displayName
+  });
 
   modal.style.display = "none";
-}
+};
 
 /* CHAT */
 let sudah = false;
@@ -281,49 +244,43 @@ window.kirim = async () => {
   typing.innerText = "AI sedang mengetik...";
   chat.appendChild(typing);
 
+  input.value = "";
+
   try {
-  const res = await fetch(
+    const res = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAWtLlQ5xB8adHnMrSGQ4S-T_CRNHYUens",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text }] }]
+        })
+      }
+    );
+
+    const data = await res.json();
+
     typing.remove();
 
-    try {
-  const res = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyB4-2nfSV8PE5WOIsy3PzMPxhRQ64oByis",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: text }]
-        }]
-      })
-    }
-  );
+    let reply =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "AI error";
 
-  const data = await res.json();
-  typing.remove();
+    typeEffect(reply);
 
-  let reply =
-    data.candidates?.[0]?.content?.parts?.[0]?.text ||
-    "AI error";
-
-  typeEffect(reply);
-
-} catch (err) {
-  typing.remove();
-  typeEffect("Error: " + err.message);
-}
-
-  input.value = "";
+  } catch (err) {
+    typing.remove();
+    typeEffect("Error: " + err.message);
+  }
 
   if (!sudah && !pernahLogin) {
     sudah = true;
     setTimeout(() => popup.classList.add("show"), 5000);
   }
-}
+};
 
-/* TYPE */
 function typeEffect(text) {
   let div = document.createElement("div");
   div.className = "msg bot";
@@ -334,12 +291,11 @@ function typeEffect(text) {
     div.innerText += text[i];
     i++;
     if (i >= text.length) clearInterval(interval);
-  }, 20);
+  }, 15);
 
   chat.scrollTop = chat.scrollHeight;
 }
 
-/* ADD MSG */
 function addMsg(text, type) {
   let div = document.createElement("div");
   div.className = "msg " + type;
