@@ -1,233 +1,207 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>AKHL AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+<title>AKHL AI</title>
 
-    header {
-      padding: 15px;
-      text-align: center;
-      background: #020617;
-      font-weight: bold;
-    }
+<!-- Font Cyber -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
-    #chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: white;
+}
 
-    .msg {
-      margin: 10px 0;
-      max-width: 75%;
-      padding: 10px;
-      border-radius: 15px;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeIn 0.3s forwards;
-    }
+/* Judul */
+h1 {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 38px;
+  color: #00f0ff;
+  text-shadow: 0 0 15px #00f0ff;
+  animation: glow 2s infinite alternate;
+}
 
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+@keyframes glow {
+  from { text-shadow: 0 0 10px #00f0ff; }
+  to { text-shadow: 0 0 30px #00f0ff; }
+}
 
-    .user {
-      background: #2563eb;
-      margin-left: auto;
-    }
+/* Container */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+  gap: 15px;
+}
 
-    .bot {
-      background: #1e293b;
-      margin-right: auto;
-    }
+/* Chat Box */
+.chat-box {
+  width: 90%;
+  max-width: 400px;
+  height: 300px;
+  overflow-y: auto;
+  background: #020617;
+  border-radius: 15px;
+  padding: 10px;
+  box-shadow: 0 0 20px #00f0ff22;
+}
 
-    .input-area {
-      display: flex;
-      padding: 10px;
-      background: #020617;
-    }
+/* Bubble */
+.msg {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 10px;
+  animation: fade 0.5s ease;
+}
 
-    input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 20px;
-      border: none;
-    }
+.user {
+  background: #00f0ff22;
+  text-align: right;
+}
 
-    button {
-      margin-left: 10px;
-      padding: 10px;
-      border-radius: 20px;
-      border: none;
-      background: #2563eb;
-      color: white;
-    }
+.bot {
+  background: #9333ea22;
+}
 
-    .fab {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      background: #2563eb;
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      font-size: 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+@keyframes fade {
+  from { opacity: 0; transform: translateY(10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
 
-    .menu {
-      position: fixed;
-      bottom: 150px;
-      right: 20px;
-      background: #1e293b;
-      border-radius: 10px;
-      display: none;
-      flex-direction: column;
-    }
+/* Input */
+.input-area {
+  display: flex;
+  width: 90%;
+  max-width: 400px;
+  gap: 10px;
+}
 
-    .menu button {
-      background: none;
-      border: none;
-      color: white;
-      padding: 10px;
-    }
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #0f172a;
+  color: white;
+  box-shadow: 0 0 10px #00f0ff33;
+}
 
-    .login {
-      text-align: center;
-      padding: 20px;
-    }
-  </style>
+input:focus {
+  outline: none;
+  box-shadow: 0 0 20px #00f0ff;
+}
+
+/* Button */
+button {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #020617;
+  color: #00f0ff;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00f0ff55;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px #00f0ff;
+}
+
+/* Menu */
+.menu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 90%;
+  max-width: 400px;
+}
+</style>
 </head>
 
 <body>
 
-<header>AKHL AI</header>
+<h1>AKHL AI</h1>
 
-<div id="login" class="login">
-  <button onclick="login()">Login dengan Google</button>
-</div>
+<div class="container">
 
-<div id="app" style="display:none;">
-  <div id="chat"></div>
+  <div class="chat-box" id="chat"></div>
 
   <div class="input-area">
-    <input id="msg" placeholder="Tulis pesan...">
-    <button onclick="send()">Kirim</button>
+    <input type="text" id="input" placeholder="Tulis pesan...">
+    <button onclick="kirim()">Kirim</button>
   </div>
 
-  <div class="fab" onclick="toggleMenu()">+</div>
+  <button onclick="loginGoogle()">Login Google</button>
 
-  <div class="menu" id="menu">
-    <button onclick="setMode('mtk')">📘 MTK</button>
-    <button onclick="setMode('pikir')">🧠 Pikirkan</button>
-    <button onclick="setMode('web')">🌐 Web</button>
-    <button onclick="setMode('code')">💻 Code+</button>
+  <div class="menu">
+    <button onclick="quick('Hitung 2+2')">MTK</button>
+    <button onclick="quick('Berpikir sesuatu')">Pikirkan</button>
+    <button onclick="quick('Cari di web')">Web</button>
+    <button onclick="quick('Buat kode')">Code+</button>
   </div>
+
 </div>
 
 <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-<script>
 const firebaseConfig = {
   apiKey: "AIzaSyBGuuXOqwE1bNNxlH8PEz4Y9jry9zz50D8",
-  authDomain: "akhl-c8e44.firebaseapp.com",
-  projectId: "akhl-c8e44",
-  appId: "1:xxxxx:web:xxxxx"
+  authDomain: "akhl-c8e44.firebaseapp.com"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-function login() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider);
+window.loginGoogle = function() {
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      addMsg("Login: " + result.user.displayName, "bot");
+    })
+    .catch((error) => {
+      alert("Login gagal: " + error.message);
+    });
 }
 
-auth.onAuthStateChanged(user => {
-  if (user) {
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    loadChat();
-  }
-});
-
-let mode = "normal";
-
-function toggleMenu() {
-  let menu = document.getElementById("menu");
-  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
-}
-
-function setMode(m) {
-  mode = m;
-}
-
-function addMessage(text, type) {
-  let div = document.createElement("div");
-  div.className = "msg " + type;
-  div.innerText = text;
-  document.getElementById("chat").appendChild(div);
-  saveChat();
-  scrollDown();
-}
-
-function scrollDown() {
-  let chat = document.getElementById("chat");
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function typingEffect(text) {
-  let div = document.createElement("div");
-  div.className = "msg bot";
-  document.getElementById("chat").appendChild(div);
-
-  let i = 0;
-  let interval = setInterval(() => {
-    div.innerText += text[i];
-    i++;
-    scrollDown();
-    if (i >= text.length) clearInterval(interval);
-  }, 20);
-}
-
-function saveChat() {
-  localStorage.setItem("chat", document.getElementById("chat").innerHTML);
-}
-
-function loadChat() {
-  let data = localStorage.getItem("chat");
-  if (data) document.getElementById("chat").innerHTML = data;
-}
-
-async function send() {
-  let input = document.getElementById("msg");
+// Chat function
+window.kirim = function() {
+  let input = document.getElementById("input");
   let text = input.value;
   if (!text) return;
 
-  addMessage(text, "user");
-  input.value = "";
+  addMsg(text, "user");
 
   setTimeout(() => {
-    typingEffect("Jawaban AI (" + mode + ")");
+    addMsg("AI: " + text, "bot");
   }, 500);
+
+  input.value = "";
+}
+
+// Quick button
+window.quick = function(text) {
+  document.getElementById("input").value = text;
+}
+
+// Add message
+function addMsg(text, type) {
+  let chat = document.getElementById("chat");
+  let div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
 }
 </script>
 
