@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>AKHL AI</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -15,26 +16,31 @@ body {
   color: white;
 }
 
-/* TOP BAR */
+/* TOP */
 .topbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 15px;
 }
 
-.title {
-  font-size: 18px;
-  font-weight: 600;
+.title { font-weight: 600; }
+
+/* PROFILE */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* 3 DOT */
-.menu-btn {
-  font-size: 22px;
-  cursor: pointer;
+.profile img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
 }
 
-/* DROPDOWN */
+/* MENU */
+.menu-btn { cursor: pointer; }
+
 .dropdown {
   position: absolute;
   right: 10px;
@@ -43,23 +49,19 @@ body {
   border-radius: 10px;
   padding: 10px;
   display: none;
-  box-shadow: 0 0 10px #000;
 }
 
 .dropdown button {
-  display: block;
   width: 100%;
-  margin: 5px 0;
   background: none;
-  color: white;
   border: none;
-  text-align: left;
+  color: white;
   padding: 10px;
-  border-radius: 8px;
+  text-align: left;
 }
 
-.dropdown button:hover {
-  background: #222;
+.logout {
+  color: red;
 }
 
 /* CHAT */
@@ -75,72 +77,71 @@ body {
   border-radius: 10px;
 }
 
-.user {
-  background: #1f1f1f;
-  text-align: right;
-}
-
-.bot {
-  background: #141414;
-}
+.user { background: #1f1f1f; text-align: right; }
+.bot { background: #141414; }
 
 /* INPUT */
 .input-area {
   display: flex;
   padding: 10px;
-  gap: 10px;
 }
 
 input {
   flex: 1;
   padding: 12px;
-  border-radius: 10px;
-  border: none;
   background: #111;
+  border: none;
+  border-radius: 10px;
   color: white;
 }
 
 button {
+  margin-left: 10px;
+  padding: 10px;
+  border-radius: 10px;
   background: #111;
   border: none;
-  padding: 10px 15px;
   color: white;
-  border-radius: 10px;
 }
 
-/* POPUP LOGIN */
+/* TYPING */
+.typing {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* POPUP */
 .popup {
   position: fixed;
   bottom: -200px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
   background: #111;
   padding: 15px;
+  border-radius: 10px;
+  transition: 0.4s;
+}
+
+.popup.show { bottom: 20px; }
+
+/* PROFILE MODAL */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000cc;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: #111;
+  padding: 20px;
   border-radius: 15px;
   text-align: center;
-  transition: 0.5s;
-}
-
-.popup.show {
-  bottom: 20px;
-}
-
-.popup button {
-  margin-top: 10px;
-  width: 100%;
-  background: white;
-  color: black;
-}
-
-/* ANIMASI */
-.fade {
-  animation: fade 0.3s ease;
-}
-
-@keyframes fade {
-  from {opacity:0; transform: translateY(10px);}
-  to {opacity:1;}
 }
 </style>
 </head>
@@ -149,32 +150,49 @@ button {
 
 <div class="topbar">
   <div class="title">AKHL AI</div>
+
+  <div class="profile" id="profileArea">
+    <img id="pfp" src="" style="display:none;">
+    <span id="username"></span>
+  </div>
+
   <div class="menu-btn" onclick="toggleMenu()">⋮</div>
 </div>
 
 <div class="dropdown" id="menu">
   <button onclick="loginGoogle()">Login Google</button>
-  <button onclick="cekAkun()">Akun</button>
-  <button onclick="toggleTheme()">Tema Hitam/Putih</button>
-  <button onclick="logout()">Logout</button>
+  <button onclick="openProfile()">Edit Profil</button>
+  <button onclick="logout()" class="logout" id="logoutBtn" style="display:none;">Logout</button>
 </div>
 
 <div class="chat" id="chat"></div>
 
 <div class="input-area">
-  <input type="text" id="input" placeholder="Tanya apa aja...">
+  <input id="input" placeholder="Tanya sesuatu...">
   <button onclick="kirim()">➤</button>
 </div>
 
 <div class="popup" id="popup">
-  <div>Ingin lanjut chat dengan AKHL AI?</div>
-  <div style="font-size:12px; opacity:0.7;">Login Google untuk fitur MTK, Web, Code+</div>
-  <button onclick="loginGoogle()">Login Google</button>
+  Login untuk fitur lengkap
+  <br><button onclick="loginGoogle()">Login Google</button>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3>Edit Profil</h3>
+    <input id="editName" placeholder="Nama baru"><br><br>
+    <input id="editPhoto" placeholder="Link foto"><br><br>
+    <button onclick="saveProfile()">Simpan</button>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { 
+  getAuth, GoogleAuthProvider, signInWithPopup, 
+  signOut, onAuthStateChanged, updateProfile 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBGuuXOqwE1bNNxlH8PEz4Y9jry9zz50D8",
@@ -185,83 +203,104 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+/* DETECT LOGIN */
+onAuthStateChanged(auth, user => {
+  if (user) {
+    document.getElementById("username").innerText = user.displayName;
+    document.getElementById("pfp").src = user.photoURL;
+    document.getElementById("pfp").style.display = "block";
+    document.getElementById("logoutBtn").style.display = "block";
+  } else {
+    document.getElementById("username").innerText = "";
+    document.getElementById("pfp").style.display = "none";
+    document.getElementById("logoutBtn").style.display = "none";
+  }
+});
+
+/* LOGIN */
+window.loginGoogle = () => {
+  signInWithPopup(auth, provider);
+}
+
+/* LOGOUT */
+window.logout = () => {
+  signOut(auth);
+}
+
 /* MENU */
 window.toggleMenu = () => {
   let m = document.getElementById("menu");
   m.style.display = m.style.display === "block" ? "none" : "block";
 }
 
-/* LOGIN */
-window.loginGoogle = () => {
-  signInWithPopup(auth, provider)
-    .then(res => {
-      addMsg("Login: " + res.user.displayName, "bot");
-    });
+/* PROFILE */
+window.openProfile = () => {
+  document.getElementById("modal").style.display = "flex";
 }
 
-/* LOGOUT */
-window.logout = () => {
-  signOut(auth);
-  addMsg("Logout berhasil", "bot");
-}
-
-/* CEK AKUN */
-window.cekAkun = () => {
+window.saveProfile = () => {
   let user = auth.currentUser;
-  if(user){
-    alert("Login sebagai: " + user.displayName);
-  } else {
-    alert("Belum login");
-  }
-}
-
-/* THEME */
-window.toggleTheme = () => {
-  document.body.style.background =
-    document.body.style.background === "white" ? "#0a0a0a" : "white";
-  document.body.style.color =
-    document.body.style.color === "black" ? "white" : "black";
+  updateProfile(user, {
+    displayName: document.getElementById("editName").value,
+    photoURL: document.getElementById("editPhoto").value
+  });
+  document.getElementById("modal").style.display = "none";
 }
 
 /* CHAT */
-let sudahChat = false;
+let sudah = false;
 
 window.kirim = () => {
-  let input = document.getElementById("input");
   let text = input.value;
   if (!text) return;
 
   addMsg(text, "user");
 
-  // Easter Egg
-  if (text.toLowerCase() === "ardi femboy") {
-    setTimeout(() => {
-      addMsg("Ya Ardi Adalah Femboy!", "bot");
-    }, 500);
-  } else {
-    setTimeout(() => {
-      addMsg("AI: " + text, "bot");
-    }, 500);
-  }
+  let typing = document.createElement("div");
+  typing.className = "msg bot typing";
+  typing.innerText = "AI sedang mengetik...";
+  chat.appendChild(typing);
+
+  setTimeout(() => {
+    typing.remove();
+
+    let response = text.toLowerCase() === "ardi femboy"
+      ? "Ya Ardi Adalah Femboy!"
+      : "AI: " + text;
+
+    typeEffect(response);
+  }, 1000);
 
   input.value = "";
 
-  // Popup setelah 5 detik
-  if (!sudahChat) {
-    sudahChat = true;
-    setTimeout(() => {
-      document.getElementById("popup").classList.add("show");
-    }, 5000);
+  if (!sudah) {
+    sudah = true;
+    setTimeout(() => popup.classList.add("show"), 5000);
   }
 }
 
-function addMsg(text, type) {
-  let chat = document.getElementById("chat");
+/* TYPE EFFECT */
+function typeEffect(text) {
   let div = document.createElement("div");
-  div.className = "msg " + type + " fade";
+  div.className = "msg bot";
+  chat.appendChild(div);
+
+  let i = 0;
+  let interval = setInterval(() => {
+    div.innerText += text[i];
+    i++;
+    if (i >= text.length) clearInterval(interval);
+  }, 20);
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* ADD MSG */
+function addMsg(text, type) {
+  let div = document.createElement("div");
+  div.className = "msg " + type;
   div.innerText = text;
   chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
 }
 </script>
 
