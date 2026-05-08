@@ -3,83 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>AKHL AI</title>
 
-<!-- Font Cyber -->
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 body {
   margin: 0;
-  font-family: 'Orbitron', sans-serif;
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  font-family: 'Inter', sans-serif;
+  background: #0a0a0a;
   color: white;
 }
 
-/* Judul */
-h1 {
-  text-align: center;
-  margin-top: 30px;
-  font-size: 38px;
-  color: #00f0ff;
-  text-shadow: 0 0 15px #00f0ff;
-  animation: glow 2s infinite alternate;
-}
-
-@keyframes glow {
-  from { text-shadow: 0 0 10px #00f0ff; }
-  to { text-shadow: 0 0 30px #00f0ff; }
-}
-
-/* Container */
-.container {
+/* TOP BAR */
+.topbar {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  margin-top: 30px;
-  gap: 15px;
+  padding: 15px;
 }
 
-/* Chat Box */
-.chat-box {
-  width: 90%;
-  max-width: 400px;
-  height: 300px;
-  overflow-y: auto;
-  background: #020617;
-  border-radius: 15px;
-  padding: 10px;
-  box-shadow: 0 0 20px #00f0ff22;
+.title {
+  font-size: 18px;
+  font-weight: 600;
 }
 
-/* Bubble */
-.msg {
-  padding: 10px;
-  margin: 5px;
+/* 3 DOT */
+.menu-btn {
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* DROPDOWN */
+.dropdown {
+  position: absolute;
+  right: 10px;
+  top: 60px;
+  background: #111;
   border-radius: 10px;
-  animation: fade 0.5s ease;
+  padding: 10px;
+  display: none;
+  box-shadow: 0 0 10px #000;
+}
+
+.dropdown button {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  background: none;
+  color: white;
+  border: none;
+  text-align: left;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.dropdown button:hover {
+  background: #222;
+}
+
+/* CHAT */
+.chat {
+  height: 70vh;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.msg {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
 }
 
 .user {
-  background: #00f0ff22;
+  background: #1f1f1f;
   text-align: right;
 }
 
 .bot {
-  background: #9333ea22;
+  background: #141414;
 }
 
-@keyframes fade {
-  from { opacity: 0; transform: translateY(10px);}
-  to { opacity: 1; transform: translateY(0);}
-}
-
-/* Input */
+/* INPUT */
 .input-area {
   display: flex;
-  width: 90%;
-  max-width: 400px;
+  padding: 10px;
   gap: 10px;
 }
 
@@ -88,72 +96,85 @@ input {
   padding: 12px;
   border-radius: 10px;
   border: none;
-  background: #0f172a;
+  background: #111;
   color: white;
-  box-shadow: 0 0 10px #00f0ff33;
 }
 
-input:focus {
-  outline: none;
-  box-shadow: 0 0 20px #00f0ff;
-}
-
-/* Button */
 button {
-  padding: 12px;
-  border-radius: 10px;
+  background: #111;
   border: none;
-  background: #020617;
-  color: #00f0ff;
-  cursor: pointer;
-  box-shadow: 0 0 10px #00f0ff55;
-  transition: 0.3s;
+  padding: 10px 15px;
+  color: white;
+  border-radius: 10px;
 }
 
-button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 20px #00f0ff;
-}
-
-/* Menu */
-.menu {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+/* POPUP LOGIN */
+.popup {
+  position: fixed;
+  bottom: -200px;
+  left: 50%;
+  transform: translateX(-50%);
   width: 90%;
-  max-width: 400px;
+  background: #111;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  transition: 0.5s;
+}
+
+.popup.show {
+  bottom: 20px;
+}
+
+.popup button {
+  margin-top: 10px;
+  width: 100%;
+  background: white;
+  color: black;
+}
+
+/* ANIMASI */
+.fade {
+  animation: fade 0.3s ease;
+}
+
+@keyframes fade {
+  from {opacity:0; transform: translateY(10px);}
+  to {opacity:1;}
 }
 </style>
 </head>
 
 <body>
 
-<h1>AKHL AI</h1>
-
-<div class="container">
-
-  <div class="chat-box" id="chat"></div>
-
-  <div class="input-area">
-    <input type="text" id="input" placeholder="Tulis pesan...">
-    <button onclick="kirim()">Kirim</button>
-  </div>
-
-  <button onclick="loginGoogle()">Login Google</button>
-
-  <div class="menu">
-    <button onclick="quick('Hitung 2+2')">MTK</button>
-    <button onclick="quick('Berpikir sesuatu')">Pikirkan</button>
-    <button onclick="quick('Cari di web')">Web</button>
-    <button onclick="quick('Buat kode')">Code+</button>
-  </div>
-
+<div class="topbar">
+  <div class="title">AKHL AI</div>
+  <div class="menu-btn" onclick="toggleMenu()">⋮</div>
 </div>
 
-<!-- Firebase -->
+<div class="dropdown" id="menu">
+  <button onclick="loginGoogle()">Login Google</button>
+  <button onclick="cekAkun()">Akun</button>
+  <button onclick="toggleTheme()">Tema Hitam/Putih</button>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<div class="chat" id="chat"></div>
+
+<div class="input-area">
+  <input type="text" id="input" placeholder="Tanya apa aja...">
+  <button onclick="kirim()">➤</button>
+</div>
+
+<div class="popup" id="popup">
+  <div>Ingin lanjut chat dengan AKHL AI?</div>
+  <div style="font-size:12px; opacity:0.7;">Login Google untuk fitur MTK, Web, Code+</div>
+  <button onclick="loginGoogle()">Login Google</button>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBGuuXOqwE1bNNxlH8PEz4Y9jry9zz50D8",
@@ -164,41 +185,80 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-window.loginGoogle = function() {
+/* MENU */
+window.toggleMenu = () => {
+  let m = document.getElementById("menu");
+  m.style.display = m.style.display === "block" ? "none" : "block";
+}
+
+/* LOGIN */
+window.loginGoogle = () => {
   signInWithPopup(auth, provider)
-    .then((result) => {
-      addMsg("Login: " + result.user.displayName, "bot");
-    })
-    .catch((error) => {
-      alert("Login gagal: " + error.message);
+    .then(res => {
+      addMsg("Login: " + res.user.displayName, "bot");
     });
 }
 
-// Chat function
-window.kirim = function() {
+/* LOGOUT */
+window.logout = () => {
+  signOut(auth);
+  addMsg("Logout berhasil", "bot");
+}
+
+/* CEK AKUN */
+window.cekAkun = () => {
+  let user = auth.currentUser;
+  if(user){
+    alert("Login sebagai: " + user.displayName);
+  } else {
+    alert("Belum login");
+  }
+}
+
+/* THEME */
+window.toggleTheme = () => {
+  document.body.style.background =
+    document.body.style.background === "white" ? "#0a0a0a" : "white";
+  document.body.style.color =
+    document.body.style.color === "black" ? "white" : "black";
+}
+
+/* CHAT */
+let sudahChat = false;
+
+window.kirim = () => {
   let input = document.getElementById("input");
   let text = input.value;
   if (!text) return;
 
   addMsg(text, "user");
 
-  setTimeout(() => {
-    addMsg("AI: " + text, "bot");
-  }, 500);
+  // Easter Egg
+  if (text.toLowerCase() === "ardi femboy") {
+    setTimeout(() => {
+      addMsg("Ya Ardi Adalah Femboy!", "bot");
+    }, 500);
+  } else {
+    setTimeout(() => {
+      addMsg("AI: " + text, "bot");
+    }, 500);
+  }
 
   input.value = "";
+
+  // Popup setelah 5 detik
+  if (!sudahChat) {
+    sudahChat = true;
+    setTimeout(() => {
+      document.getElementById("popup").classList.add("show");
+    }, 5000);
+  }
 }
 
-// Quick button
-window.quick = function(text) {
-  document.getElementById("input").value = text;
-}
-
-// Add message
 function addMsg(text, type) {
   let chat = document.getElementById("chat");
   let div = document.createElement("div");
-  div.className = "msg " + type;
+  div.className = "msg " + type + " fade";
   div.innerText = text;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
