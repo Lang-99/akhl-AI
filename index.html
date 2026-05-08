@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>AKHL AI</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -25,16 +24,15 @@ body {
 
 .title { font-weight: 600; }
 
-/* PROFILE */
 .profile {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .profile img {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
 }
 
@@ -60,9 +58,7 @@ body {
   text-align: left;
 }
 
-.logout {
-  color: red;
-}
+.logout { color: red; }
 
 /* CHAT */
 .chat {
@@ -104,12 +100,6 @@ button {
   color: white;
 }
 
-/* TYPING */
-.typing {
-  font-size: 12px;
-  opacity: 0.6;
-}
-
 /* POPUP */
 .popup {
   position: fixed;
@@ -124,7 +114,7 @@ button {
 
 .popup.show { bottom: 20px; }
 
-/* PROFILE MODAL */
+/* MODAL */
 .modal {
   position: fixed;
   top: 0;
@@ -143,6 +133,12 @@ button {
   border-radius: 15px;
   text-align: center;
 }
+
+/* typing */
+.typing {
+  font-size: 12px;
+  opacity: 0.6;
+}
 </style>
 </head>
 
@@ -151,8 +147,8 @@ button {
 <div class="topbar">
   <div class="title">AKHL AI</div>
 
-  <div class="profile" id="profileArea">
-    <img id="pfp" src="" style="display:none;">
+  <div class="profile">
+    <img id="pfp" style="display:none;">
     <span id="username"></span>
   </div>
 
@@ -177,22 +173,19 @@ button {
   <br><button onclick="loginGoogle()">Login Google</button>
 </div>
 
-<!-- PROFILE MODAL -->
+<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <h3>Edit Profil</h3>
     <input id="editName" placeholder="Nama baru"><br><br>
-    <input id="editPhoto" placeholder="Link foto"><br><br>
+    <input type="file" id="editPhotoFile" accept="image/*"><br><br>
     <button onclick="saveProfile()">Simpan</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { 
-  getAuth, GoogleAuthProvider, signInWithPopup, 
-  signOut, onAuthStateChanged, updateProfile 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBGuuXOqwE1bNNxlH8PEz4Y9jry9zz50D8",
@@ -203,17 +196,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+let pernahLogin = localStorage.getItem("login");
+
 /* DETECT LOGIN */
 onAuthStateChanged(auth, user => {
   if (user) {
-    document.getElementById("username").innerText = user.displayName;
-    document.getElementById("pfp").src = user.photoURL;
-    document.getElementById("pfp").style.display = "block";
-    document.getElementById("logoutBtn").style.display = "block";
+    username.innerText = user.displayName;
+    pfp.src = user.photoURL;
+    pfp.style.display = "block";
+    logoutBtn.style.display = "block";
+
+    localStorage.setItem("login", "true");
+    popup.style.display = "none";
+
   } else {
-    document.getElementById("username").innerText = "";
-    document.getElementById("pfp").style.display = "none";
-    document.getElementById("logoutBtn").style.display = "none";
+    username.innerText = "";
+    pfp.style.display = "none";
+    logoutBtn.style.display = "none";
+
+    localStorage.removeItem("login");
   }
 });
 
@@ -225,26 +226,45 @@ window.loginGoogle = () => {
 /* LOGOUT */
 window.logout = () => {
   signOut(auth);
+  popup.classList.remove("show");
 }
 
 /* MENU */
 window.toggleMenu = () => {
-  let m = document.getElementById("menu");
-  m.style.display = m.style.display === "block" ? "none" : "block";
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
 /* PROFILE */
 window.openProfile = () => {
-  document.getElementById("modal").style.display = "flex";
+  if (!auth.currentUser) return alert("Login dulu!");
+  modal.style.display = "flex";
 }
 
 window.saveProfile = () => {
   let user = auth.currentUser;
-  updateProfile(user, {
-    displayName: document.getElementById("editName").value,
-    photoURL: document.getElementById("editPhoto").value
-  });
-  document.getElementById("modal").style.display = "none";
+  if (!user) return;
+
+  let name = editName.value;
+  let file = editPhotoFile.files[0];
+
+  if (file) {
+    let reader = new FileReader();
+    reader.onload = e => {
+      updateProfile(user, {
+        displayName: name || user.displayName,
+        photoURL: e.target.result
+      }).then(() => {
+        pfp.src = e.target.result;
+      });
+    };
+    reader.readAsDataURL(file);
+  } else {
+    updateProfile(user, {
+      displayName: name || user.displayName
+    });
+  }
+
+  modal.style.display = "none";
 }
 
 /* CHAT */
@@ -264,22 +284,22 @@ window.kirim = () => {
   setTimeout(() => {
     typing.remove();
 
-    let response = text.toLowerCase() === "ardi femboy"
+    let res = text.toLowerCase() === "ardi femboy"
       ? "Ya Ardi Adalah Femboy!"
       : "AI: " + text;
 
-    typeEffect(response);
+    typeEffect(res);
   }, 1000);
 
   input.value = "";
 
-  if (!sudah) {
+  if (!sudah && !pernahLogin) {
     sudah = true;
     setTimeout(() => popup.classList.add("show"), 5000);
   }
 }
 
-/* TYPE EFFECT */
+/* TYPE */
 function typeEffect(text) {
   let div = document.createElement("div");
   div.className = "msg bot";
